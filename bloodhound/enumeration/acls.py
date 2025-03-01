@@ -155,6 +155,12 @@ def parse_binary_acl(entry, entrytype, acl, objecttype_guid_map):
                 and ace_object.acedata.get_object_type().lower() == objecttype_guid_map['service-principal-name']:
                     relations.append(build_relation(sid, 'WriteSPN', inherited=is_inherited))
 
+                # Unmanaged by bloodhound
+                # UserAccountControl property write rights
+                if entrytype in ['user', 'computer'] and ace_object.acedata.has_flag(ACCESS_ALLOWED_OBJECT_ACE.ACE_OBJECT_TYPE_PRESENT) \
+                and 'user-account-control' in objecttype_guid_map and ace_object.acedata.get_object_type().lower() == objecttype_guid_map['user-account-control']:
+                    relations.append(build_relation(sid, 'WriteUserAccountControl', inherited=is_inherited))
+
             elif ace_object.acedata.mask.has_priv(ACCESS_MASK.ADS_RIGHT_DS_SELF):
                 # Self add - since 4.0
                 if entrytype == 'group' and ace_object.acedata.data.ObjectType == EXTRIGHTS_GUID_MAPPING['WriteMember']:
